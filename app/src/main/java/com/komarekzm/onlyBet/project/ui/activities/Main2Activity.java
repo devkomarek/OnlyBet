@@ -31,7 +31,7 @@ import com.komarekzm.onlyBet.project.R;
 import com.komarekzm.onlyBet.project.adapters.PagerAdapter;
 import com.komarekzm.onlyBet.project.models.objects.ListOfHistoryAndTips;
 import com.komarekzm.onlyBet.project.models.objects.Tip;
-import com.komarekzm.onlyBet.project.Toasts.Toasts;
+import com.komarekzm.onlyBet.project.toasts.Toasts;
 import com.komarekzm.onlyBet.project.tasks.tasksHistory.DeleteFromHistoryDatabase;
 import com.komarekzm.onlyBet.project.tasks.tasksHistory.LoadInitialTipsToHistoryDatabase;
 import com.komarekzm.onlyBet.project.tasks.tasksHistory.ReadFromHistoryDatabase;
