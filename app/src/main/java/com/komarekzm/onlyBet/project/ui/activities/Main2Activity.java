@@ -29,6 +29,7 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crash.FirebaseCrash;
 import com.komarekzm.onlyBet.project.R;
 import com.komarekzm.onlyBet.project.adapters.PagerAdapter;
+import com.komarekzm.onlyBet.project.models.Cache;
 import com.komarekzm.onlyBet.project.models.objects.ListOfHistoryAndTips;
 import com.komarekzm.onlyBet.project.models.objects.Tip;
 import com.komarekzm.onlyBet.project.toasts.Toasts;
@@ -54,7 +55,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class Main2Activity extends AppCompatActivity implements FragmentTipsList.FragmentItemClickCallback, FragmentHistoryDay.FragmentItemClickCallback, FragmentHistoryMonth.FragmentItemClickCallback {
@@ -127,6 +133,8 @@ public class Main2Activity extends AppCompatActivity implements FragmentTipsList
         }
     }
 
+    //private void
+
     private void loadListIfDatabaseExist() {
         File tipsDatabase = getApplicationContext().getDatabasePath("tips.db");
         File historyDatabase = getApplicationContext().getDatabasePath("history.db");
@@ -150,7 +158,7 @@ public class Main2Activity extends AppCompatActivity implements FragmentTipsList
                 loader.setOnDatabaseBuilt(new LoadInitialTipsToHistoryDatabase.OnDatabaseBuilt() {
                     @Override
                     public void buildComplete() {
-                        loadList();
+
                     }
                 });
                 loader.execute();
@@ -164,7 +172,7 @@ public class Main2Activity extends AppCompatActivity implements FragmentTipsList
         loader.setOnDatabaseBuilt(new LoadInitialTipsToTipDatabase.OnDatabaseBuilt() {
             @Override
             public void buildComplete() {
-                loadList();
+
             }
         });
         loader.execute();
@@ -175,7 +183,7 @@ public class Main2Activity extends AppCompatActivity implements FragmentTipsList
         loader.setOnDatabaseBuilt(new LoadInitialTipsToHistoryDatabase.OnDatabaseBuilt() {
             @Override
             public void buildComplete() {
-                loadList();
+
             }
         });
         loader.execute();
@@ -433,7 +441,6 @@ public class Main2Activity extends AppCompatActivity implements FragmentTipsList
             }
 
             List<Tip> listTip = result.getListTip();
-
             String[] dateSplit = listTip.get(0).getDate().split("/");
 
             if (!dateSplit[1].equals(version)) {
@@ -442,13 +449,15 @@ public class Main2Activity extends AppCompatActivity implements FragmentTipsList
                 Tip tip = new Tip("Released the new version", "Get the latest versionB", "", "", "", "OnlyBet");
                 listTip.add(tip);
                 result.setListTip(listTip);
-                DeleteData(result);
+                Cache.setListOfHistoryAndTips(result, getApplicationContext());
+                // DeleteData(result);
                 return;
             }
-
-
-            DeleteData(result);
-
+            //addRecordToHistory(result.getListHistory());
+            Cache.setListOfHistoryAndTips(result, getApplicationContext());
+            progressBarAnimationOut();
+            //  viewPager.getAdapter().notifyDataSetChanged();
+            // DeleteData(result);
 
         }
 
@@ -463,54 +472,70 @@ public class Main2Activity extends AppCompatActivity implements FragmentTipsList
             } else {
                 if (!equateList(list1, list2)) {
                     Toasts.displayWhileStart(Main2Activity.this, Toasts.State.newTips);
-
-
                 }
             }
         }
 
-        private void DeleteData(final ListOfHistoryAndTips r) {
-            ReadFromTipDatabase reader = new ReadFromTipDatabase(getApplicationContext());
-            reader.setQueryCompleteListener(new ReadFromTipDatabase.OnQueryComplete() {
-                @Override
-                public void setQueryComplete(final ArrayList readResult) {
-                    DeleteFromHistoryDatabase delete = new DeleteFromHistoryDatabase(getApplicationContext());
-                    delete.setDeleteCompleteListener(new DeleteFromHistoryDatabase.OnDeleteComplete() {
-                        @Override
-                        public void setQueryComplete(Long res) {
-                            WriteToHistoryDatabase writer = new WriteToHistoryDatabase(getApplicationContext(), r.getListHistory());
-                            writer.setWriteCompleteListener(new WriteToHistoryDatabase.OnWriteComplete() {
-                                @Override
-                                public void setWriteComplete(long result) {
-                                    DeleteFromTipDatabase delete = new DeleteFromTipDatabase(getApplicationContext());
-                                    delete.setDeleteCompleteListener(new DeleteFromTipDatabase.OnDeleteComplete() {
-                                        @Override
-                                        public void setQueryComplete(Long res) {
-                                            WriteToTipDatabase writer = new WriteToTipDatabase(getApplicationContext(), r.getListTip());
-                                            writer.setWriteCompleteListener(new WriteToTipDatabase.OnWriteComplete() {
-                                                @Override
-                                                public void setWriteComplete(long result) {
-                                                    toastDisplay(readResult, r.getListTip());
-                                                    progressBarAnimationOut();
-                                                    viewPager.getAdapter().notifyDataSetChanged();
-                                                }
-                                            });
-                                            writer.execute();
-                                        }
+//        private void addRecordToHistory(List<Tip> tipList)
+//        {
+//            compareList(tipList);
+//        }
+//
+//        private void compareList(List<Tip> tipList)
+//        {
+//            final ReadFromHistoryDatabase reader = new ReadFromHistoryDatabase(getApplicationContext());
+//            reader.setQueryCompleteListener(new ReadFromHistoryDatabase.OnQueryComplete() {
+//                @Override
+//                public void setQueryComplete(final ArrayList readResult) {
+//
+//                }
+//            });
+//            reader.execute();
+//        }
 
-                                    });
-                                    delete.execute();
-                                }
-                            });
-                            writer.execute();
-                        }
-
-                    });
-                    delete.execute();
-                }
-            });
-            reader.execute();
-        }
+//        private void DeleteData(final ListOfHistoryAndTips r) {
+//            ReadFromTipDatabase reader = new ReadFromTipDatabase(getApplicationContext());
+//            reader.setQueryCompleteListener(new ReadFromTipDatabase.OnQueryComplete() {
+//                @Override
+//                public void setQueryComplete(final ArrayList readResult) {
+//                            DeleteFromHistoryDatabase delete = new DeleteFromHistoryDatabase(getApplicationContext());
+//                            delete.setDeleteCompleteListener(new DeleteFromHistoryDatabase.OnDeleteComplete() {
+//                                @Override
+//                                public void setQueryComplete(Long res) {
+//                                    WriteToHistoryDatabase writer = new WriteToHistoryDatabase(getApplicationContext(), r.getListHistory());
+//                                    writer.setWriteCompleteListener(new WriteToHistoryDatabase.OnWriteComplete() {
+//                                        @Override
+//                                        public void setWriteComplete(long result) {
+//                                            DeleteFromTipDatabase delete = new DeleteFromTipDatabase(getApplicationContext());
+//                                            delete.setDeleteCompleteListener(new DeleteFromTipDatabase.OnDeleteComplete() {
+//                                                @Override
+//                                                public void setQueryComplete(Long res) {
+//                                                    WriteToTipDatabase writer = new WriteToTipDatabase(getApplicationContext(), r.getListTip());
+//                                                    writer.setWriteCompleteListener(new WriteToTipDatabase.OnWriteComplete() {
+//                                                        @Override
+//                                                        public void setWriteComplete(long result) {
+//                                                            toastDisplay(readResult, r.getListTip());
+//                                                            progressBarAnimationOut();
+//                                                           // viewPager.getAdapter().notifyDataSetChanged();
+//                                                        }
+//                                                    });
+//                                                    writer.execute();
+//                                                }
+//
+//                                            });
+//                                            delete.execute();
+//                                        }
+//                                    });
+//                                    writer.execute();
+//                                }
+//
+//                            });
+//                            delete.execute();
+//
+//                }
+//            });
+//            reader.execute();
+//        }
 
         private boolean equateList(List<Tip> list1, List<Tip> list2) {
             try {

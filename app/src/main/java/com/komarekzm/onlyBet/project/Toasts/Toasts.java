@@ -1,4 +1,4 @@
-package com.komarekzm.onlyBet.project.Toasts;
+package com.komarekzm.onlyBet.project.toasts;
 
 import android.content.Context;
 import android.widget.Toast;

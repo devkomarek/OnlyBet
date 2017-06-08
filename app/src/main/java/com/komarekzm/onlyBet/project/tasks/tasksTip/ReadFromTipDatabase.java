@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import com.komarekzm.onlyBet.project.models.database.TipsDatabase;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 public class ReadFromTipDatabase extends AsyncTask<Void, Void, ArrayList> {
     private Context context;
@@ -13,7 +14,7 @@ public class ReadFromTipDatabase extends AsyncTask<Void, Void, ArrayList> {
     private OnQueryComplete onQueryComplete;
 
     public interface OnQueryComplete {
-        void setQueryComplete(ArrayList result);
+        void setQueryComplete(ArrayList result) throws ExecutionException, InterruptedException;
     }
 
     public void setQueryCompleteListener(OnQueryComplete onQueryComplete) {
@@ -32,7 +33,13 @@ public class ReadFromTipDatabase extends AsyncTask<Void, Void, ArrayList> {
 
     @Override
     protected void onPostExecute(ArrayList result) {
-        onQueryComplete.setQueryComplete(result);
+        try {
+            onQueryComplete.setQueryComplete(result);
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
 
